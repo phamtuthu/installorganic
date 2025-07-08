@@ -155,21 +155,25 @@ def main():
 
         mapped_data = []
         for row in raw_data:
-            mapped_row = []
-            for af_col, ch_col in zip(appsflyer_cols, ch_cols):
-                val = row.get(af_col)
-                if ch_col == "bundle_id":
-                    mapped_row.append(app_id)
-                elif ch_col in DATETIME_CH_COLS:
-                    dt_val = parse_datetime(val)
-                    mapped_row.append(dt_val)
-                else:
-                    mapped_row.append(val if val not in (None, "", "null", "None") else None)
-            # Lọc ngay theo event_time
-            if max_event_time:
-                if mapped_row[event_time_idx] and mapped_row[event_time_idx] <= max_event_time:
-                    continue  # skip old rows
-            mapped_data.append(mapped_row)
+    mapped_row = []
+    for af_col, ch_col in zip(appsflyer_cols, ch_cols):
+        val = row.get(af_col)
+        # Nếu là trường media_source, force về 'organic'
+        if ch_col == "media_source":
+            mapped_row.append("organic")
+        elif ch_col == "bundle_id":
+            mapped_row.append(app_id)
+        elif ch_col in DATETIME_CH_COLS:
+            dt_val = parse_datetime(val)
+            mapped_row.append(dt_val)
+        else:
+            mapped_row.append(val if val not in (None, "", "null", "None") else None)
+    # Lọc ngay theo event_time
+    if max_event_time:
+        if mapped_row[event_time_idx] and mapped_row[event_time_idx] <= max_event_time:
+            continue  # skip old rows
+    mapped_data.append(mapped_row)
+
 
         print(f"➕ Số dòng mới sẽ insert: {len(mapped_data)}")
 
