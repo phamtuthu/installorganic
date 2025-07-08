@@ -21,14 +21,33 @@ APPSFLYER_TO_CH = {
     "Install Time": "install_time",
     "Event Time": "event_time",
     "Event Name": "event_name",
-    "Event Value": "event_value",
-    "Event Revenue": "event_revenue",
     "Partner": "partner",
     "Media Source": "media_source",
     "Campaign": "campaign",
     "Adset": "adset",
     "Ad": "ad",
     "Ad Type": "ad_type",
+    "Contributor 1 Touch Type": "contributor_1_touch_type",
+    "Contributor 1 Touch Time": "contributor_1_touch_time",
+    "Contributor 1 Partner": "contributor_1_partner",
+    "Contributor 1 Match Type": "contributor_1_match_type",
+    "Contributor 1 Media Source": "contributor_1_media_source",
+    "Contributor 1 Campaign": "contributor_1_campaign",
+    "Contributor 1 Engagement Type": "contributor_1_engagement_type",
+    "Contributor 2 Touch Type": "contributor_2_touch_type",
+    "Contributor 2 Touch Time": "contributor_2_touch_time",
+    "Contributor 2 Partner": "contributor_2_partner",
+    "Contributor 2 Media Source": "contributor_2_media_source",
+    "Contributor 2 Campaign": "contributor_2_campaign",
+    "Contributor 2 Match Type": "contributor_2_match_type",
+    "Contributor 2 Engagement Type": "contributor_2_engagement_type",
+    "Contributor 3 Touch Type": "contributor_3_touch_type",
+    "Contributor 3 Touch Time": "contributor_3_touch_time",
+    "Contributor 3 Partner": "contributor_3_partner",
+    "Contributor 3 Media Source": "contributor_3_media_source",
+    "Contributor 3 Campaign": "contributor_3_campaign",
+    "Contributor 3 Match Type": "contributor_3_match_type",
+    "Contributor 3 Engagement Type": "contributor_3_engagement_type",
     "City": "city",
     "IP": "ip",
     "AppsFlyer ID": "appsflyer_id",
@@ -57,7 +76,9 @@ ADDITIONAL_FIELDS = (
     "gdpr_applies,ad_user_data_enabled,ad_personalization_enabled"
 )
 DATETIME_CH_COLS = {
-    "attributed_touch_time", "install_time", "event_time", "device_download_time"
+    "attributed_touch_time", "install_time", "event_time",
+    "contributor_1_touch_time", "contributor_2_touch_time",
+    "contributor_3_touch_time", "device_download_time"
 }
 
 def get_bundle_id(app_id):
