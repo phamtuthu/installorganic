@@ -21,33 +21,14 @@ APPSFLYER_TO_CH = {
     "Install Time": "install_time",
     "Event Time": "event_time",
     "Event Name": "event_name",
+    "Event Value": "event_value",
+    "Event Revenue": "event_revenue",
     "Partner": "partner",
     "Media Source": "media_source",
     "Campaign": "campaign",
     "Adset": "adset",
     "Ad": "ad",
     "Ad Type": "ad_type",
-    "Contributor 1 Touch Type": "contributor_1_touch_type",
-    "Contributor 1 Touch Time": "contributor_1_touch_time",
-    "Contributor 1 Partner": "contributor_1_partner",
-    "Contributor 1 Match Type": "contributor_1_match_type",
-    "Contributor 1 Media Source": "contributor_1_media_source",
-    "Contributor 1 Campaign": "contributor_1_campaign",
-    "Contributor 1 Engagement Type": "contributor_1_engagement_type",
-    "Contributor 2 Touch Type": "contributor_2_touch_type",
-    "Contributor 2 Touch Time": "contributor_2_touch_time",
-    "Contributor 2 Partner": "contributor_2_partner",
-    "Contributor 2 Media Source": "contributor_2_media_source",
-    "Contributor 2 Campaign": "contributor_2_campaign",
-    "Contributor 2 Match Type": "contributor_2_match_type",
-    "Contributor 2 Engagement Type": "contributor_2_engagement_type",
-    "Contributor 3 Touch Type": "contributor_3_touch_type",
-    "Contributor 3 Touch Time": "contributor_3_touch_time",
-    "Contributor 3 Partner": "contributor_3_partner",
-    "Contributor 3 Media Source": "contributor_3_media_source",
-    "Contributor 3 Campaign": "contributor_3_campaign",
-    "Contributor 3 Match Type": "contributor_3_match_type",
-    "Contributor 3 Engagement Type": "contributor_3_engagement_type",
     "City": "city",
     "IP": "ip",
     "AppsFlyer ID": "appsflyer_id",
@@ -63,29 +44,26 @@ APPSFLYER_TO_CH = {
     "Match Type": "match_type",
     "Device Download Time": "device_download_time",
     "Device Model": "device_model",
-    "Engagement Type": "engagement_type",
+    "Engagement Type": "engagement_type"
 }
-
 ADDITIONAL_FIELDS = (
     "blocked_reason_rule,store_reinstall,impressions,contributor3_match_type,custom_dimension,conversion_type,"
     "gp_click_time,match_type,mediation_network,oaid,deeplink_url,blocked_reason,blocked_sub_reason,"
     "gp_broadcast_referrer,gp_install_begin,campaign_type,custom_data,rejected_reason,device_download_time,"
     "keyword_match_type,contributor1_match_type,contributor2_match_type,device_model,monetization_network,"
-    "segment,is_lat,gp_referrer,blocked_reason_value,device_category,app_type,rejected_reason_value,"
+    "segment,is_lat,gp_referrer,blocked_reason_value,store_product_page,device_category,app_type,rejected_reason_value,"
     "ad_unit,keyword_id,placement,network_account_id,install_app_store,amazon_aid,att,engagement_type,"
     "contributor1_engagement_type,contributor2_engagement_type,contributor3_engagement_type,"
     "gdpr_applies,ad_user_data_enabled,ad_personalization_enabled"
 )
 DATETIME_CH_COLS = {
-    "attributed_touch_time",
-    "install_time",
-    "event_time",
-    "contributor_1_touch_time",
-    "contributor_2_touch_time",
-    "contributor_3_touch_time",
-    "device_download_time",
+    "attributed_touch_time", "install_time", "event_time", "device_download_time"
 }
 
+def get_bundle_id(app_id):
+    if app_id == "id1203171490":
+        return "vn.ghn.app.shiip"
+    return app_id
 
 def parse_datetime(val):
     if val is None:
@@ -105,6 +83,13 @@ def parse_datetime(val):
     print(f"⚠️ DateTime sai định dạng: '{val}' -> set None")
     return None
 
+def parse_int_zero(val):
+    try:
+        if val is None or str(val).strip() in ('', 'null', 'none', 'n/a'):
+            return 0
+        return int(float(val))
+    except Exception:
+        return 0
 
 def get_vn_time_range(hours=2):
     now_utc = datetime.now(timezone.utc)
@@ -112,7 +97,6 @@ def get_vn_time_range(hours=2):
     to_time = now_vn
     from_time = to_time - timedelta(hours=hours)
     return from_time.strftime("%Y-%m-%d %H:%M:%S"), to_time.strftime("%Y-%m-%d %H:%M:%S")
-
 
 def download_appsflyer_events(app_id, from_time, to_time):
     url = (
@@ -131,16 +115,11 @@ def download_appsflyer_events(app_id, from_time, to_time):
     data = [row for row in reader]
     return data
 
-
 def main():
     from_time, to_time = get_vn_time_range(2)
     print(f"🕒 Lấy AppsFlyer từ {from_time} đến {to_time} (Asia/Ho_Chi_Minh)")
     client = Client(
-        host=CH_HOST,
-        port=CH_PORT,
-        user=CH_USER,
-        password=CH_PASSWORD,
-        database=CH_DATABASE,
+        host=CH_HOST, port=CH_PORT, user=CH_USER, password=CH_PASSWORD, database=CH_DATABASE
     )
     appsflyer_cols = list(APPSFLYER_TO_CH.keys())
     ch_cols = list(APPSFLYER_TO_CH.values())
@@ -150,10 +129,11 @@ def main():
 
     for app_id in APP_IDS:
         app_id = app_id.strip()
-        print(f"\n==== Processing APP_ID: {app_id} ====")
-        # Lấy event_time lớn nhất đã insert cho từng app_id, *với media_source='organic'*
+        bundle_id = get_bundle_id(app_id)
+        print(f"\n==== Processing APP_ID: {app_id} (bundle_id={bundle_id}) ====")
+        # Lấy event_time lớn nhất đã insert cho từng app_id, media_source='organic'
         result = client.execute(
-            f"SELECT max(event_time) FROM {CH_TABLE} WHERE bundle_id='{app_id}' AND media_source='organic'"
+            f"SELECT max(event_time) FROM {CH_TABLE} WHERE bundle_id='{bundle_id}' AND media_source='organic'"
         )
         max_event_time = result[0][0] if result and result[0][0] else None
         if max_event_time:
@@ -174,13 +154,15 @@ def main():
                 if ch_col == "media_source":
                     mapped_row.append("organic")
                 elif ch_col == "bundle_id":
-                    mapped_row.append(app_id)
+                    mapped_row.append(bundle_id)
+                elif ch_col == "event_revenue":
+                    mapped_row.append(parse_int_zero(val))
                 elif ch_col in DATETIME_CH_COLS:
                     dt_val = parse_datetime(val)
                     mapped_row.append(dt_val)
                 else:
                     mapped_row.append(val if val not in (None, "", "null", "None") else None)
-            # Lọc ngay theo event_time (theo từng media_source)
+            # Lọc theo event_time (theo từng bundle_id đúng và media_source)
             if max_event_time:
                 if mapped_row[event_time_idx] and mapped_row[event_time_idx] <= max_event_time:
                     continue  # skip old rows
