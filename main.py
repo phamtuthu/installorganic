@@ -144,22 +144,21 @@ def main():
     appsflyer_cols = list(APPSFLYER_TO_CH.keys())
     ch_cols = list(APPSFLYER_TO_CH.values())
     event_time_idx = ch_cols.index("event_time")
-    bundle_id_idx = ch_cols.index("bundle_id") if "bundle_id" in ch_cols else None
 
     total_inserted = 0
 
     for app_id in APP_IDS:
         app_id = app_id.strip()
         print(f"\n==== Processing APP_ID: {app_id} ====")
-        # Lấy event_time lớn nhất đã insert của từng app_id
+        # Lấy event_time lớn nhất đã insert cho từng app_id, *với media_source='organic'*
         result = client.execute(
-            f"SELECT max(event_time) FROM {CH_TABLE} WHERE bundle_id='{app_id}'"
+            f"SELECT max(event_time) FROM {CH_TABLE} WHERE bundle_id='{app_id}' AND media_source='organic'"
         )
         max_event_time = result[0][0] if result and result[0][0] else None
         if max_event_time:
-            print(f"Max event_time đã có: {max_event_time}")
+            print(f"Max event_time (organic) đã có: {max_event_time}")
         else:
-            print("Bảng trống hoặc chưa có event nào cho app này.")
+            print("Bảng trống hoặc chưa có event nào cho app này (organic).")
 
         raw_data = download_appsflyer_events(app_id, from_time, to_time)
         if not raw_data:
@@ -180,7 +179,7 @@ def main():
                     mapped_row.append(dt_val)
                 else:
                     mapped_row.append(val if val not in (None, "", "null", "None") else None)
-            # Lọc ngay theo event_time
+            # Lọc ngay theo event_time (theo từng media_source)
             if max_event_time:
                 if mapped_row[event_time_idx] and mapped_row[event_time_idx] <= max_event_time:
                     continue  # skip old rows
@@ -200,7 +199,6 @@ def main():
 
     client.disconnect()
     print(f"\n== Tổng số rows insert vào ClickHouse (cả các app): {total_inserted} ==")
-
 
 if __name__ == "__main__":
     main()
