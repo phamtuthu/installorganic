@@ -71,9 +71,10 @@ ADDITIONAL_FIELDS = (
     "gp_click_time,match_type,mediation_network,oaid,deeplink_url,blocked_reason,blocked_sub_reason,"
     "gp_broadcast_referrer,gp_install_begin,campaign_type,custom_data,rejected_reason,device_download_time,"
     "keyword_match_type,contributor1_match_type,contributor2_match_type,device_model,monetization_network,"
-    "segment,is_lat,gp_referrer,blocked_reason_value,store_product_page,device_category,app_type,"
-    "rejected_reason_value,ad_unit,keyword_id,placement,network_account_id,install_app_store,amazon_aid,att,"
-    "engagement_type,gdpr_applies,ad_user_data_enabled,ad_personalization_enabled"
+    "segment,is_lat,gp_referrer,blocked_reason_value,device_category,app_type,rejected_reason_value,"
+    "ad_unit,keyword_id,placement,network_account_id,install_app_store,amazon_aid,att,engagement_type,"
+    "contributor1_engagement_type,contributor2_engagement_type,contributor3_engagement_type,"
+    "gdpr_applies,ad_user_data_enabled,ad_personalization_enabled"
 )
 DATETIME_CH_COLS = {
     "attributed_touch_time",
